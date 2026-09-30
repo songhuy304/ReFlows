@@ -1,0 +1,32 @@
+import { NotificationCenter } from "@/features/notifications/components/notification-center";
+import { Breadcrumbs } from "../breadcrumbs";
+import LocaleSwitcher from "../locale-switcher";
+import SearchInput from "../search-input";
+import { ThemeModeToggle } from "../themes/theme-mode-toggle";
+import { ThemeSelector } from "../themes/theme-selector";
+import { Separator } from "../ui/separator";
+import { SidebarTrigger } from "../ui/sidebar";
+
+export default function Header() {
+  return (
+    <header className="bg-background/60 sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between gap-2 backdrop-blur-md md:h-14">
+      <div className="flex items-center gap-2 px-4">
+        <SidebarTrigger className="-ml-1" />
+        <Separator orientation="vertical" className="mr-2 h-4" />
+        <Breadcrumbs />
+      </div>
+
+      <div className="flex items-center gap-2 px-4">
+        <div className="hidden md:flex">
+          <SearchInput />
+        </div>
+        <ThemeModeToggle />
+        <LocaleSwitcher />
+        <div className="hidden sm:block">
+          <ThemeSelector />
+        </div>
+        <NotificationCenter />
+      </div>
+    </header>
+  );
+}
