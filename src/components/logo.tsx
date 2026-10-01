@@ -48,7 +48,7 @@ const Logo: React.FC<LogoProps> = ({
               textClassName
             )}
           >
-            RFlow
+            ReFlows
           </span>
         )}
       </Link>

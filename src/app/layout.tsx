@@ -13,7 +13,7 @@ import NextTopLoader from "nextjs-toploader";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import "../styles/globals.css";
 
-export const metadata = createMetadata("RecruitHub");
+export const metadata = createMetadata("");
 
 const META_THEME_COLORS = {
   light: "#ffffff",

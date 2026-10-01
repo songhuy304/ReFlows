@@ -9,10 +9,10 @@ import { SidebarTrigger } from "../ui/sidebar";
 
 export default function Header() {
   return (
-    <header className="bg-background/60 sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between gap-2 backdrop-blur-md md:h-14">
-      <div className="flex items-center gap-2 px-4">
+    <header className="flex h-12 shrink-0 items-center gap-2 group-[variant=floating]:border-b border-transparent px-4 justify-between">
+      <div className="flex items-center gap-2">
         <SidebarTrigger className="-ml-1" />
-        <Separator orientation="vertical" className="mr-2 h-4" />
+        <Separator orientation="vertical" className="mr-2 h-4!" />
         <Breadcrumbs />
       </div>
 
