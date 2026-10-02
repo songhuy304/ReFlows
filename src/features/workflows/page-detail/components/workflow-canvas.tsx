@@ -22,11 +22,21 @@ import {
   type EdgeTypes,
   type NodeChange,
   type NodeTypes,
+  type FitViewOptions,
   type XYPosition,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useTheme } from "next-themes";
-import { useCallback, useMemo, useRef, useState, type DragEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type Dispatch,
+  type DragEvent,
+  type SetStateAction,
+} from "react";
 import type { CanvasMode } from "../constants/canvas-modes";
 import {
   getShapeConfig,
@@ -50,51 +60,15 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
 
 const PAN_WITH_MIDDLE_OR_RIGHT_BUTTON = [1, 2];
 
-const initialNodes: ShapeNodeType[] = [
-  {
-    id: "1",
-    type: "shape",
-    position: { x: 0, y: 0 },
-    width: 160,
-    height: 56,
-    data: { label: "Order created", shape: "rounded" },
-  },
-  {
-    id: "2",
-    type: "shape",
-    position: { x: 10, y: 120 },
-    width: 140,
-    height: 100,
-    data: { label: "Valid order?", shape: "diamond" },
-  },
-  {
-    id: "3",
-    type: "shape",
-    position: { x: 0, y: 290 },
-    width: 160,
-    height: 56,
-    data: { label: "Send confirmation", shape: "rounded" },
-  },
-];
+const FIT_VIEW_OPTIONS: FitViewOptions = { padding: { y: "40px", x: "80px" } };
 
-const initialEdges: LabeledEdgeType[] = [
-  {
-    id: "e1-2",
-    source: "1",
-    sourceHandle: "bottom",
-    target: "2",
-    targetHandle: "top",
-    animated: true,
-  },
-  {
-    id: "e2-3",
-    source: "2",
-    sourceHandle: "bottom",
-    target: "3",
-    targetHandle: "top",
-    data: { label: "Yes" },
-  },
-];
+interface WorkflowCanvasProps {
+  nodes: ShapeNodeType[];
+  edges: LabeledEdgeType[];
+  setNodes: Dispatch<SetStateAction<ShapeNodeType[]>>;
+  setEdges: Dispatch<SetStateAction<LabeledEdgeType[]>>;
+  fitViewKey?: number;
+}
 
 function createShapeNode(shape: ShapeType, center: XYPosition): ShapeNodeType {
   const config = getShapeConfig(shape);
@@ -109,12 +83,16 @@ function createShapeNode(shape: ShapeType, center: XYPosition): ShapeNodeType {
   };
 }
 
-function WorkflowFlow() {
+function WorkflowFlow({ nodes, edges, setNodes, setEdges, fitViewKey }: WorkflowCanvasProps) {
   const { resolvedTheme } = useTheme();
-  const { screenToFlowPosition } = useReactFlow();
+  const { screenToFlowPosition, fitView } = useReactFlow();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [nodes, setNodes] = useState<ShapeNodeType[]>(initialNodes);
-  const [edges, setEdges] = useState<LabeledEdgeType[]>(initialEdges);
+
+  useEffect(() => {
+    if (!fitViewKey) return;
+    const frame = window.requestAnimationFrame(() => void fitView(FIT_VIEW_OPTIONS));
+    return () => window.cancelAnimationFrame(frame);
+  }, [fitViewKey, fitView]);
   const [mode, setMode] = useState<CanvasMode>("select");
   const [editingEdgeId, setEditingEdgeId] = useState<string | null>(null);
   const isSelectMode = mode === "select";
@@ -127,13 +105,13 @@ function WorkflowFlow() {
   const onNodesChange = useCallback(
     (changes: NodeChange<ShapeNodeType>[]) =>
       setNodes((current) => applyNodeChanges(changes, current)),
-    []
+    [setNodes]
   );
 
   const onEdgesChange = useCallback(
     (changes: EdgeChange<LabeledEdgeType>[]) =>
       setEdges((current) => applyEdgeChanges(changes, current)),
-    []
+    [setEdges]
   );
 
   const onEdgeDoubleClick: EdgeMouseHandler<LabeledEdgeType> = useCallback((_, edge) => {
@@ -142,12 +120,15 @@ function WorkflowFlow() {
 
   const onConnect = useCallback(
     (connection: Connection) => setEdges((current) => addEdge(connection, current)),
-    []
+    [setEdges]
   );
 
-  const addShapeAt = useCallback((shape: ShapeType, center: XYPosition) => {
-    setNodes((current) => [...current, createShapeNode(shape, center)]);
-  }, []);
+  const addShapeAt = useCallback(
+    (shape: ShapeType, center: XYPosition) => {
+      setNodes((current) => [...current, createShapeNode(shape, center)]);
+    },
+    [setNodes]
+  );
 
   const handleAddShape = useCallback(
     (shape: ShapeType) => {
@@ -210,7 +191,7 @@ function WorkflowFlow() {
           onDrop={onDrop}
           colorMode={resolvedTheme === "dark" ? "dark" : "light"}
           fitView
-          fitViewOptions={{ padding: { y: "40px", x: "80px" } }}
+          fitViewOptions={FIT_VIEW_OPTIONS}
         >
           <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
           <CanvasToolbar mode={mode} onModeChange={setMode} onAddShape={handleAddShape} />
@@ -222,10 +203,10 @@ function WorkflowFlow() {
   );
 }
 
-function WorkflowCanvas() {
+function WorkflowCanvas(props: WorkflowCanvasProps) {
   return (
     <ReactFlowProvider>
-      <WorkflowFlow />
+      <WorkflowFlow {...props} />
     </ReactFlowProvider>
   );
 }

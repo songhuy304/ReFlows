@@ -38,4 +38,10 @@ export const QUERY_KEY = {
     LIST: ["job", "list"],
     DETAIL: (id: number) => ["job", "detail", id],
   },
+
+  WORKFLOW: {
+    ROOT: "workflow",
+    LIST: ["workflow", "list"],
+    DETAIL: (id: number | string) => ["workflow", "detail", String(id)],
+  },
 } as const;

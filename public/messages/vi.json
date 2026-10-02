@@ -159,6 +159,12 @@
   "error": {
     "internal-sever": "Lỗi hệ thống",
     "internal-server": "Lỗi hệ thống",
+    "workflow": {
+      "not-found": "Không tìm thấy workflow hoặc workflow đã bị xoá.",
+      "forbidden": "Bạn không có quyền truy cập workflow này.",
+      "chat-last-message-not-user": "Tin nhắn cuối cùng phải là của người dùng.",
+      "ai-invalid-response": "AI trả về kết quả không hợp lệ. Vui lòng thử lại."
+    },
     "user": {
       "forbidden": "Bạn không có quyền thực hiện hành động này.",
       "not-found": "Không tìm thấy người dùng.",

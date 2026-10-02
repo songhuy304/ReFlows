@@ -36,7 +36,12 @@ interface AgentChatPanelProps {
   description?: string;
   placeholder?: string;
   suggestions?: string[];
-  onSendMessage?: (content: string) => void;
+  /** When provided, the panel is controlled and only renders these messages. */
+  messages?: AgentChatMessage[];
+  isResponding?: boolean;
+  /** A rejected promise restores the typed message into the input. */
+  onSendMessage?: (content: string) => void | Promise<void>;
+  onReset?: () => void;
   className?: string;
 }
 
@@ -78,33 +83,64 @@ function AgentChatMessageBubble({ message }: { message: AgentChatMessage }) {
   );
 }
 
+function AgentChatThinkingBubble() {
+  return (
+    <div className="flex justify-start">
+      <div className="bg-muted text-muted-foreground flex items-center gap-2 rounded-2xl px-3 py-2 text-sm">
+        <Icons.spinner className="size-4 animate-spin" />
+        Thinking...
+      </div>
+    </div>
+  );
+}
+
 function AgentChatBody({
   title = "Agent",
   description = "Ask the agent anything to get started.",
   placeholder = "Ask the agent...",
   suggestions = [],
+  messages: controlledMessages,
+  isResponding = false,
   onSendMessage,
+  onReset,
   onClose,
 }: AgentChatBodyProps) {
-  const [messages, setMessages] = useState<AgentChatMessage[]>([]);
+  const [internalMessages, setInternalMessages] = useState<AgentChatMessage[]>([]);
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const isControlled = controlledMessages !== undefined;
+  const messages = controlledMessages ?? internalMessages;
 
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [messages]);
+  }, [messages, isResponding]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const content = input.trim();
-    if (!content) return;
+    if (!content || isResponding) return;
 
-    setMessages((current) => [
-      ...current,
-      { id: crypto.randomUUID(), role: "user", content },
-    ]);
+    if (!isControlled) {
+      setInternalMessages((current) => [
+        ...current,
+        { id: crypto.randomUUID(), role: "user", content },
+      ]);
+    }
     setInput("");
-    onSendMessage?.(content);
+
+    try {
+      await onSendMessage?.(content);
+    } catch {
+      setInput(content);
+    }
+  };
+
+  const handleReset = () => {
+    if (isControlled) {
+      onReset?.();
+    } else {
+      setInternalMessages([]);
+    }
   };
 
   return (
@@ -121,8 +157,8 @@ function AgentChatBody({
             variant="ghost"
             size="icon"
             className="size-7"
-            onClick={() => setMessages([])}
-            disabled={messages.length === 0}
+            onClick={handleReset}
+            disabled={messages.length === 0 || isResponding}
             aria-label="New chat"
           >
             <Icons.add className="size-4" />
@@ -140,7 +176,7 @@ function AgentChatBody({
       </div>
 
       <div ref={scrollRef} className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        {messages.length === 0 ? (
+        {messages.length === 0 && !isResponding ? (
           <AgentChatEmptyState
             description={description}
             suggestions={suggestions}
@@ -151,6 +187,7 @@ function AgentChatBody({
             {messages.map((message) => (
               <AgentChatMessageBubble key={message.id} message={message} />
             ))}
+            {isResponding && <AgentChatThinkingBubble />}
           </div>
         )}
       </div>
@@ -159,7 +196,8 @@ function AgentChatBody({
         <PromptInput
           value={input}
           onValueChange={setInput}
-          onSubmit={handleSubmit}
+          onSubmit={() => void handleSubmit()}
+          isLoading={isResponding}
           maxHeight={160}
           className="rounded-2xl"
         >
@@ -169,8 +207,8 @@ function AgentChatBody({
               <Button
                 size="icon"
                 className="size-8 rounded-full"
-                onClick={handleSubmit}
-                disabled={!input.trim()}
+                onClick={() => void handleSubmit()}
+                disabled={!input.trim() || isResponding}
                 aria-label="Send message"
               >
                 <Icons.arrowUp className="size-4" />

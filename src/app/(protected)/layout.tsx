@@ -1,4 +1,5 @@
 import KBar from "@/components/kbar";
+import AppBootstrap from "@/components/layout/app-bootstrap";
 import AppSidebar from "@/components/layout/app-sidebar";
 import Header from "@/components/layout/header";
 import { InfoSidebar } from "@/components/layout/info-sidebar";
@@ -12,21 +13,21 @@ export default async function Layout({ children }: { children: React.ReactNode }
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
 
   return (
-    // <AppBootstrap>
-    <SocketProvider>
-      <KBar>
-        <SidebarProvider defaultOpen={defaultOpen}>
-          <AppSidebar />
-          <SidebarInset>
-            <Header />
-            <InfobarProvider defaultOpen={false}>
-              {children}
-              <InfoSidebar side="right" />
-            </InfobarProvider>
-          </SidebarInset>
-        </SidebarProvider>
-      </KBar>
-    </SocketProvider>
-    // </AppBootstrap>
+    <AppBootstrap>
+      <SocketProvider>
+        <KBar>
+          <SidebarProvider defaultOpen={defaultOpen}>
+            <AppSidebar />
+            <SidebarInset>
+              <Header />
+              <InfobarProvider defaultOpen={false}>
+                {children}
+                <InfoSidebar side="right" />
+              </InfobarProvider>
+            </SidebarInset>
+          </SidebarProvider>
+        </KBar>
+      </SocketProvider>
+    </AppBootstrap>
   );
 }

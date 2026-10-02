@@ -117,6 +117,12 @@
   "error": {
     "internal-sever": "Internal server error",
     "internal-server": "Internal server error",
+    "workflow": {
+      "not-found": "Workflow not found or has been deleted.",
+      "forbidden": "You do not have permission to access this workflow.",
+      "chat-last-message-not-user": "The last chat message must be from the user.",
+      "ai-invalid-response": "The AI returned an invalid result. Please try again."
+    },
     "user": {
       "forbidden": "You do not have permission to perform this action.",
       "not-found": "User not found.",
