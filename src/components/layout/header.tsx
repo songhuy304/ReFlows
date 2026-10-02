@@ -9,7 +9,7 @@ import { SidebarTrigger } from "../ui/sidebar";
 
 export default function Header() {
   return (
-    <header className="flex h-12 shrink-0 items-center gap-2 group-[variant=floating]:border-b border-transparent px-4 justify-between">
+    <header className="flex shrink-0 items-center gap-2 py-3 px-4 justify-between bg-sidebar border-b border-border">
       <div className="flex items-center gap-2">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4!" />

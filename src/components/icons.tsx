@@ -3,7 +3,10 @@ import {
   IconAlertCircle,
   IconAlertTriangle,
   IconArrowBackUp,
+  IconArrowLeft,
   IconArrowRight,
+  IconArrowUp,
+  IconDeviceFloppy,
   IconBell,
   IconBold,
   IconBox,
@@ -27,6 +30,11 @@ import {
   IconChevronsLeft,
   IconChevronsRight,
   IconCircle,
+  IconDiamonds,
+  IconSquare,
+  IconSquareRounded,
+  IconPointer,
+  IconHandStop,
   IconCircleCheck,
   IconCirclePlus,
   IconCircleX,
@@ -92,6 +100,7 @@ import {
   IconShield,
   IconSlash,
   IconSparkles,
+  IconSparkles2,
   IconStack2,
   IconStar,
   IconSun,
@@ -118,7 +127,10 @@ export const Icons = {
   // General
   alertCircle: IconAlertCircle,
   warning: IconAlertTriangle,
+  arrowLeft: IconArrowLeft,
   arrowRight: IconArrowRight,
+  arrowUp: IconArrowUp,
+  save: IconDeviceFloppy,
   check: IconCheck,
   checks: IconChecks,
   circleCheck: IconCircleCheck,
@@ -226,6 +238,7 @@ export const Icons = {
   pro: IconCrown,
   exclusive: IconStar,
   sparkles: IconSparkles,
+  sparkles2: IconSparkles2,
   badgeCheck: IconRosetteDiscountCheck,
   lock: IconLock,
   shield: IconShield,
@@ -244,6 +257,15 @@ export const Icons = {
   text: IconTypography,
   list: IconList,
   listNumbers: IconListNumbers,
+
+  // Shapes
+  shapeRectangle: IconSquare,
+  shapeRounded: IconSquareRounded,
+  shapeDiamond: IconDiamonds,
+
+  // Canvas tools
+  pointer: IconPointer,
+  hand: IconHandStop,
 
   // Toast
   toastSuccess: IconCircleCheck,

@@ -53,7 +53,7 @@ export default function AppSidebar() {
   }, [isOpen]);
 
   return (
-    <Sidebar variant="floating" collapsible="icon">
+    <Sidebar variant="sidebar" collapsible="icon">
       <SidebarHeader className="px-4 py-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-0">
         <Logo />
       </SidebarHeader>
