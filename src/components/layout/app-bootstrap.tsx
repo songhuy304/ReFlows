@@ -30,12 +30,12 @@ export default function AppBootstrap({ children }: { children: React.ReactNode }
   });
 
   useEffect(() => {
-    if (!isHydrated || isPending) return;
+    if (!isHydrated) return;
 
     if (!hasToken || error) {
-      router.replace(`${AUTH_PATHS.SIGN_IN}?redirect=${window.location.pathname}`);
+      router.replace(`${AUTH_PATHS.SIGN_IN}?redirect=${encodeURIComponent(window.location.pathname)}`);
     }
-  }, [isHydrated, isPending, hasToken, error, router]);
+  }, [isHydrated, hasToken, error, router]);
 
   useEffect(() => {
     if (data) {

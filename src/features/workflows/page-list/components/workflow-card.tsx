@@ -4,18 +4,11 @@ import { Icons } from "@/components/icons";
 import { AlertModal } from "@/components/modal/alert-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { formatDate } from "@/lib/format";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
-import { WorkflowStatusBadge } from "../../components/workflow-status-badge";
 import { useDeleteWorkflow } from "../../hooks";
 import type { IWorkflow } from "../../types";
 import { getApiErrorMessage } from "../../utils/get-api-error-message";
@@ -62,33 +55,6 @@ function WorkflowCard({ workflow }: WorkflowCardProps) {
                 Updated {formatDate(workflow.updatedAt, "DD-MM-YYYY HH:mm")}
               </p>
             </div>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="size-8 shrink-0" aria-label="Workflow actions">
-                  <Icons.ellipsis className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <Link href={detailHref}>
-                    <Icons.externalLink />
-                    Open
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem variant="destructive" onSelect={() => setIsDeleteOpen(true)}>
-                  <Icons.trash />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          <div className="flex items-center justify-between gap-2">
-            <WorkflowStatusBadge status={workflow.status} />
-            <span className="text-muted-foreground text-xs">
-              {stepCount} {stepCount === 1 ? "step" : "steps"}
-            </span>
           </div>
 
           <Button size="sm" className="w-full" asChild>
