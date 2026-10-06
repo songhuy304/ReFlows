@@ -172,6 +172,7 @@ function WorkflowEditorContent({ workflow }: WorkflowEditorContentProps) {
               setNodes={editor.setNodes}
               setEdges={editor.setEdges}
               fitViewKey={editor.fitViewKey}
+              onAutoLayout={editor.autoLayout}
             />
           </div>
         </div>

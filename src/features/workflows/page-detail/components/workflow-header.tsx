@@ -46,7 +46,7 @@ function WorkflowName({ name, isRenaming, onRename }: WorkflowNameProps) {
     return (
       <EditableLabel
         value={name}
-        className="h-8 min-w-40 rounded-md border px-2 text-left text-sm font-semibold"
+        className="h-8 min-w-0 rounded-md px-2 text-left text-sm font-semibold"
         onCommit={(next) => {
           setIsEditing(false);
           if (next !== name) onRename?.(next);

@@ -22,7 +22,6 @@ function WorkflowCard({ workflow }: WorkflowCardProps) {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const { mutate: deleteWorkflow, isPending: isDeleting } = useDeleteWorkflow();
   const detailHref = `/workflows/${workflow.id}`;
-  const stepCount = workflow.graph.nodes.length;
 
   const handleDelete = () => {
     deleteWorkflow(workflow.id, {

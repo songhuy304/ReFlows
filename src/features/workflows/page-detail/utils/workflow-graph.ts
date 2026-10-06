@@ -9,7 +9,12 @@ import type { LabeledEdgeType } from "../components/labeled-edge";
 import type { ShapeNodeType } from "../components/shape-node";
 import { getShapeConfig, isShapeType } from "../constants/shapes";
 
-const LAYOUT_OPTIONS = { rankdir: "TB", nodesep: 60, ranksep: 80 };
+const LAYOUT_OPTIONS = { rankdir: "TB", nodesep: 80, ranksep: 80, edgesep: 20 };
+
+const OVERLAP_GAP = 16;
+const EDGE_LABEL_CHAR_WIDTH = 7;
+const EDGE_LABEL_PADDING = 24;
+const EDGE_LABEL_HEIGHT = 24;
 
 export interface CanvasGraph {
   nodes: ShapeNodeType[];
@@ -48,31 +53,72 @@ function toLabeledEdge(edge: IWorkflowEdge): LabeledEdgeType {
   };
 }
 
+function getNodeSize(node: ShapeNodeType): { width: number; height: number } {
+  return {
+    width: node.measured?.width ?? node.width ?? 0,
+    height: node.measured?.height ?? node.height ?? 0,
+  };
+}
+
 function computeLayoutPositions(
   nodes: ShapeNodeType[],
   edges: LabeledEdgeType[]
 ): Map<string, IWorkflowNodePosition> {
-  const graph = new graphlib.Graph();
+  const graph = new graphlib.Graph({ multigraph: true });
   graph.setGraph(LAYOUT_OPTIONS);
   graph.setDefaultEdgeLabel(() => ({}));
 
-  nodes.forEach((node) => {
-    graph.setNode(node.id, { width: node.width ?? 0, height: node.height ?? 0 });
+  nodes.forEach((node) => graph.setNode(node.id, getNodeSize(node)));
+  edges.forEach((edge) => {
+    const label = edge.data?.label?.trim();
+    // Labels get their own rank slot so they don't sit on top of nodes.
+    const labelSize = label
+      ? {
+          width: label.length * EDGE_LABEL_CHAR_WIDTH + EDGE_LABEL_PADDING,
+          height: EDGE_LABEL_HEIGHT,
+          labelpos: "c",
+        }
+      : {};
+    graph.setEdge(edge.source, edge.target, labelSize, edge.id);
   });
-  edges.forEach((edge) => graph.setEdge(edge.source, edge.target));
 
   layout(graph);
 
   return new Map(
     nodes.map((node) => {
       const { x, y } = graph.node(node.id);
-      return [node.id, { x: x - (node.width ?? 0) / 2, y: y - (node.height ?? 0) / 2 }];
+      const { width, height } = getNodeSize(node);
+      return [node.id, { x: x - width / 2, y: y - height / 2 }];
     })
   );
 }
 
+function hasOverlappingNodes(nodes: ShapeNodeType[]): boolean {
+  const boxes = nodes.map((node) => ({ ...node.position, ...getNodeSize(node) }));
+
+  return boxes.some((a, index) =>
+    boxes.slice(index + 1).some(
+      (b) =>
+        a.x < b.x + b.width + OVERLAP_GAP &&
+        b.x < a.x + a.width + OVERLAP_GAP &&
+        a.y < b.y + b.height + OVERLAP_GAP &&
+        b.y < a.y + a.height + OVERLAP_GAP
+    )
+  );
+}
+
+/** Re-positions every node with dagre, ignoring current positions. */
+export function layoutNodes(
+  nodes: ShapeNodeType[],
+  edges: LabeledEdgeType[]
+): ShapeNodeType[] {
+  const positions = computeLayoutPositions(nodes, edges);
+  return nodes.map((node) => ({ ...node, position: positions.get(node.id) ?? node.position }));
+}
+
 /**
  * Nodes with a saved `position` stay where they are; only nodes without one are placed by dagre.
+ * If the result has overlapping nodes (e.g. the API/AI returned stacked positions), the whole graph is re-laid out.
  * `previousNodes` keeps on-canvas sizes when a graph (e.g. from the AI) replaces the current one.
  */
 export function fromWorkflowGraph(
@@ -89,19 +135,19 @@ export function fromWorkflowGraph(
   const unplacedIds = new Set(
     graph.nodes.filter((node) => !isValidPosition(node.position)).map((node) => node.id)
   );
-  if (unplacedIds.size === 0) return { nodes, edges };
+  if (unplacedIds.size === 0) {
+    return { nodes: hasOverlappingNodes(nodes) ? layoutNodes(nodes, edges) : nodes, edges };
+  }
 
   const layoutPositions = computeLayoutPositions(nodes, edges);
   const offset = getLayoutOffset(nodes, unplacedIds, layoutPositions);
+  const placedNodes = nodes.map((node) => {
+    const suggested = layoutPositions.get(node.id);
+    if (!unplacedIds.has(node.id) || !suggested) return node;
+    return { ...node, position: { x: suggested.x + offset.x, y: suggested.y + offset.y } };
+  });
 
-  return {
-    nodes: nodes.map((node) => {
-      const suggested = layoutPositions.get(node.id);
-      if (!unplacedIds.has(node.id) || !suggested) return node;
-      return { ...node, position: { x: suggested.x + offset.x, y: suggested.y + offset.y } };
-    }),
-    edges,
-  };
+  return { nodes: hasOverlappingNodes(placedNodes) ? layoutNodes(nodes, edges) : placedNodes, edges };
 }
 
 /** Average shift between dagre's frame and the user's saved layout, so new nodes land near their neighbours. */

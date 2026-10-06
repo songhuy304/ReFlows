@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import type { IWorkflowGraph } from "../../types";
 import type { LabeledEdgeType } from "../components/labeled-edge";
 import type { ShapeNodeType } from "../components/shape-node";
-import { fromWorkflowGraph, toWorkflowGraph } from "../utils/workflow-graph";
+import { fromWorkflowGraph, layoutNodes, toWorkflowGraph } from "../utils/workflow-graph";
 
 export function useWorkflowEditor(savedGraph: IWorkflowGraph) {
   const [initial] = useState(() => fromWorkflowGraph(savedGraph));
@@ -35,6 +35,11 @@ export function useWorkflowEditor(savedGraph: IWorkflowGraph) {
     [nodes]
   );
 
+  const autoLayout = useCallback(() => {
+    setNodes((current) => layoutNodes(current, edges));
+    setFitViewKey((key) => key + 1);
+  }, [edges]);
+
   return {
     nodes,
     edges,
@@ -44,6 +49,7 @@ export function useWorkflowEditor(savedGraph: IWorkflowGraph) {
     isDirty,
     markSaved,
     applyGraph,
+    autoLayout,
     fitViewKey,
   };
 }

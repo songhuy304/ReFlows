@@ -7,13 +7,14 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { cn } from "@/lib/utils";
 import { Panel } from "@xyflow/react";
 import type { DragEvent, ReactNode } from "react";
-import { CANVAS_MODES, type CanvasMode } from "../constants/canvas-modes";
+import { AUTO_LAYOUT_ACTION, CANVAS_MODES, type CanvasMode } from "../constants/canvas-modes";
 import { SHAPE_DRAG_MIME, SHAPES, type ShapeType } from "../constants/shapes";
 
 interface CanvasToolbarProps {
   mode: CanvasMode;
   onModeChange: (mode: CanvasMode) => void;
   onAddShape: (shape: ShapeType) => void;
+  onAutoLayout: () => void;
 }
 
 interface ToolTooltipProps {
@@ -39,7 +40,7 @@ function handleDragStart(event: DragEvent<HTMLButtonElement>, shape: ShapeType) 
   event.dataTransfer.effectAllowed = "move";
 }
 
-function CanvasToolbar({ mode, onModeChange, onAddShape }: CanvasToolbarProps) {
+function CanvasToolbar({ mode, onModeChange, onAddShape, onAutoLayout }: CanvasToolbarProps) {
   return (
     <Panel
       position="center-left"
@@ -82,6 +83,21 @@ function CanvasToolbar({ mode, onModeChange, onAddShape }: CanvasToolbarProps) {
           </Button>
         </ToolTooltip>
       ))}
+
+      <Separator className="my-0.5" />
+
+      <ToolTooltip label={AUTO_LAYOUT_ACTION.label} shortcut={AUTO_LAYOUT_ACTION.shortcut}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          onClick={onAutoLayout}
+          aria-label={AUTO_LAYOUT_ACTION.label}
+          aria-keyshortcuts={AUTO_LAYOUT_ACTION.shortcut}
+        >
+          <AUTO_LAYOUT_ACTION.icon className="size-4" />
+        </Button>
+      </ToolTooltip>
     </Panel>
   );
 }

@@ -51,7 +51,10 @@ function EditableLabel({
       onChange={(event) => setDraft(event.target.value)}
       onBlur={commit}
       onKeyDown={handleKeyDown}
-      className={cn("nodrag w-full bg-transparent text-center text-sm outline-none", className)}
+      className={cn(
+        "nodrag w-fit bg-transparent text-center text-sm outline-none",
+        className
+      )}
     />
   );
 }

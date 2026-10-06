@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { CANVAS_MODES, type CanvasMode } from "../constants/canvas-modes";
+import { AUTO_LAYOUT_ACTION, CANVAS_MODES, type CanvasMode } from "../constants/canvas-modes";
 import { SHAPES, type ShapeType } from "../constants/shapes";
 
 interface CanvasShortcutHandlers {
   onModeChange: (mode: CanvasMode) => void;
   onAddShape: (shape: ShapeType) => void;
+  onAutoLayout: () => void;
 }
 
 function isTypingTarget(target: EventTarget | null): boolean {
@@ -38,6 +39,12 @@ export function useCanvasShortcuts(handlers: CanvasShortcutHandlers): void {
       if (mode) {
         event.preventDefault();
         handlersRef.current.onModeChange(mode.mode);
+        return;
+      }
+
+      if (key === AUTO_LAYOUT_ACTION.shortcut) {
+        event.preventDefault();
+        handlersRef.current.onAutoLayout();
         return;
       }
 

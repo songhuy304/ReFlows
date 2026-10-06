@@ -68,6 +68,7 @@ interface WorkflowCanvasProps {
   setNodes: Dispatch<SetStateAction<ShapeNodeType[]>>;
   setEdges: Dispatch<SetStateAction<LabeledEdgeType[]>>;
   fitViewKey?: number;
+  onAutoLayout: () => void;
 }
 
 function createShapeNode(shape: ShapeType, center: XYPosition): ShapeNodeType {
@@ -83,7 +84,14 @@ function createShapeNode(shape: ShapeType, center: XYPosition): ShapeNodeType {
   };
 }
 
-function WorkflowFlow({ nodes, edges, setNodes, setEdges, fitViewKey }: WorkflowCanvasProps) {
+function WorkflowFlow({
+  nodes,
+  edges,
+  setNodes,
+  setEdges,
+  fitViewKey,
+  onAutoLayout,
+}: WorkflowCanvasProps) {
   const { resolvedTheme } = useTheme();
   const { screenToFlowPosition, fitView } = useReactFlow();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -144,7 +152,7 @@ function WorkflowFlow({ nodes, edges, setNodes, setEdges, fitViewKey }: Workflow
     [addShapeAt, screenToFlowPosition]
   );
 
-  useCanvasShortcuts({ onModeChange: setMode, onAddShape: handleAddShape });
+  useCanvasShortcuts({ onModeChange: setMode, onAddShape: handleAddShape, onAutoLayout });
 
   const onDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
     if (!event.dataTransfer.types.includes(SHAPE_DRAG_MIME)) return;
@@ -194,7 +202,12 @@ function WorkflowFlow({ nodes, edges, setNodes, setEdges, fitViewKey }: Workflow
           fitViewOptions={FIT_VIEW_OPTIONS}
         >
           <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
-          <CanvasToolbar mode={mode} onModeChange={setMode} onAddShape={handleAddShape} />
+          <CanvasToolbar
+            mode={mode}
+            onModeChange={setMode}
+            onAddShape={handleAddShape}
+            onAutoLayout={onAutoLayout}
+          />
           <Controls />
           <MiniMap pannable zoomable />
         </ReactFlow>

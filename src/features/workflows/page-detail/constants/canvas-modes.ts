@@ -13,3 +13,5 @@ export const CANVAS_MODES: CanvasModeConfig[] = [
   { mode: "select", label: "Select", icon: Icons.pointer, shortcut: "V" },
   { mode: "pan", label: "Hand", icon: Icons.hand, shortcut: "H" },
 ];
+
+export const AUTO_LAYOUT_ACTION = { label: "Auto layout", icon: Icons.flowchart, shortcut: "L" };
