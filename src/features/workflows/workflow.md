@@ -231,14 +231,20 @@ Ví dụ:
 
 ## 3. Error codes
 
-| HTTP | `message` | Khi nào |
-| --- | --- | --- |
-| 400 | mảng lỗi validate | Body/query sai format |
-| 400 | `error.workflow.chat-last-message-not-user` | Tin nhắn cuối trong `messages` không phải `user` |
-| 400 | `AI provider request failed` | Gọi AI provider thất bại (hết quota, sai key, timeout...) |
-| 403 | `error.workflow.forbidden` | Workflow không thuộc user hiện tại |
-| 404 | `error.workflow.not-found` | Không tìm thấy workflow (hoặc đã xoá) |
-| 502 | `error.workflow.ai-invalid-response` | AI trả JSON hỏng / graph không hợp lệ, FE cho user thử lại |
+| HTTP | `message` | Khi nào | Cho retry |
+| --- | --- | --- | --- |
+| 400 | mảng lỗi validate | Body/query sai format | Không |
+| 400 | `error.workflow.chat-last-message-not-user` | Tin nhắn cuối trong `messages` không phải `user` | Không, bug FE |
+| 403 | `error.workflow.forbidden` | Workflow không thuộc user hiện tại | Không |
+| 404 | `error.workflow.not-found` | Không tìm thấy workflow (hoặc đã xoá) | Không |
+| 502 | `error.workflow.ai-invalid-response` | AI trả JSON hỏng / graph không hợp lệ | Có |
+| 502 | `error.ai.provider-failed` | Provider lỗi (hết quota, sai key, 5xx) sau khi đã thử cả fallback | Có |
+| 502 | `error.ai.provider-timeout` | Hết timeout trước khi provider trả về | Có |
+| 502 | `error.ai.provider-empty-response` | Provider trả response rỗng | Có |
+
+Bốn lỗi 502 là lỗi tạm thời của AI: FE giữ tin nhắn user (đánh dấu lỗi + nút "Retry") và hiện một message chung `error.ai.unavailable`.
+
+BE gọi Groq rồi fallback OpenRouter **nối tiếp**, mỗi provider timeout 60s → worst case ~120s. FE đặt timeout request chat là 130s (`AI_REQUEST_TIMEOUT_MS`).
 
 ---
 

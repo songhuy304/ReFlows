@@ -9,7 +9,8 @@ import {
   IWorkflow,
 } from "../types";
 
-const AI_REQUEST_TIMEOUT_MS = 60_000;
+// BE tries Groq then OpenRouter sequentially (60s each), so the worst case is ~120s.
+const AI_REQUEST_TIMEOUT_MS = 130_000;
 
 const PATH = {
   BASE: "/workflows",

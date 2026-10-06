@@ -123,6 +123,12 @@
       "chat-last-message-not-user": "The last chat message must be from the user.",
       "ai-invalid-response": "The AI returned an invalid result. Please try again."
     },
+    "ai": {
+      "unavailable": "The AI is not responding right now. Please try again.",
+      "provider-failed": "The AI provider request failed. Please try again.",
+      "provider-timeout": "The AI took too long to respond. Please try again.",
+      "provider-empty-response": "The AI returned an empty response. Please try again."
+    },
     "user": {
       "forbidden": "You do not have permission to perform this action.",
       "not-found": "User not found.",

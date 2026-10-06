@@ -165,6 +165,12 @@
       "chat-last-message-not-user": "Tin nhắn cuối cùng phải là của người dùng.",
       "ai-invalid-response": "AI trả về kết quả không hợp lệ. Vui lòng thử lại."
     },
+    "ai": {
+      "unavailable": "AI đang không phản hồi, thử lại giúp mình nhé.",
+      "provider-failed": "Không gọi được AI provider. Vui lòng thử lại.",
+      "provider-timeout": "AI phản hồi quá lâu. Vui lòng thử lại.",
+      "provider-empty-response": "AI không trả về nội dung. Vui lòng thử lại."
+    },
     "user": {
       "forbidden": "Bạn không có quyền thực hiện hành động này.",
       "not-found": "Không tìm thấy người dùng.",

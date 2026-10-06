@@ -107,9 +107,14 @@ function WorkflowHeader({
             <Icons.arrowLeft className="size-4" />
           </Link>
         </Button>
-        <Separator orientation="vertical" className="mx-1 data-[orientation=vertical]:h-5" />
+        <Separator
+          orientation="vertical"
+          className="mx-1 data-[orientation=vertical]:h-5"
+        />
         <WorkflowName name={name} isRenaming={isRenaming} onRename={onRename} />
-        {status && <WorkflowStatusBadge status={status} className="hidden md:inline-flex" />}
+        {status && (
+          <WorkflowStatusBadge status={status} className="hidden md:inline-flex" />
+        )}
       </div>
 
       <WorkflowViewTabs value={view} onValueChange={onViewChange} />
@@ -151,11 +156,13 @@ function WorkflowHeader({
           aria-label={isPublished ? "Published" : "Publish"}
         >
           <Icons.send className="size-4" />
-          <span className="hidden sm:inline">{isPublished ? "Published" : "Publish"}</span>
+          <span className="hidden sm:inline">
+            {isPublished ? "Published" : "Publish"}
+          </span>
         </Button>
 
-        <AgentChatTrigger />
         <WorkflowExportMenu onExport={onExport} />
+        <AgentChatTrigger />
       </div>
     </div>
   );

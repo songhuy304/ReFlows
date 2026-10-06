@@ -15,6 +15,16 @@ function extractErrorKey(error: unknown): string | undefined {
   return typeof message === "string" ? message : undefined;
 }
 
+/** 502 from the chat endpoint is always a transient AI/provider failure, never a data error. */
+export function isRetryableAiError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "statusCode" in error &&
+    (error as { statusCode: unknown }).statusCode === 502
+  );
+}
+
 export function getApiErrorMessage(error: unknown, t: TFunction): string {
   const key = extractErrorKey(error) ?? FALLBACK_ERROR_KEY;
   return t.has(key) ? t(key) : key;

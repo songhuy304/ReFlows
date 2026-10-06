@@ -183,6 +183,7 @@ function WorkflowEditorContent({ workflow }: WorkflowEditorContentProps) {
           messages={chat.messages}
           isResponding={chat.isResponding}
           onSendMessage={chat.sendMessage}
+          onRetry={(messageId) => void chat.retryMessage(messageId)}
           onReset={chat.resetChat}
         />
       </div>

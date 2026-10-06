@@ -22,6 +22,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAgentChat } from "./agent-chat-provider";
 
 const AGENT_CHAT_WIDTH = "24rem";
+const DEFAULT_MAX_MESSAGE_LENGTH = 4000;
 
 type AgentChatRole = "user" | "assistant";
 
@@ -29,6 +30,8 @@ interface AgentChatMessage {
   id: string;
   role: AgentChatRole;
   content: string;
+  /** A failed message is kept in the list and can be resent via `onRetry`. */
+  status?: "error";
 }
 
 interface AgentChatPanelProps {
@@ -36,11 +39,13 @@ interface AgentChatPanelProps {
   description?: string;
   placeholder?: string;
   suggestions?: string[];
+  maxLength?: number;
   /** When provided, the panel is controlled and only renders these messages. */
   messages?: AgentChatMessage[];
   isResponding?: boolean;
   /** A rejected promise restores the typed message into the input. */
   onSendMessage?: (content: string) => void | Promise<void>;
+  onRetry?: (messageId: string) => void;
   onReset?: () => void;
   className?: string;
 }
@@ -66,19 +71,44 @@ function AgentChatEmptyState({
   );
 }
 
-function AgentChatMessageBubble({ message }: { message: AgentChatMessage }) {
+function AgentChatMessageBubble({
+  message,
+  isRetryDisabled,
+  onRetry,
+}: {
+  message: AgentChatMessage;
+  isRetryDisabled: boolean;
+  onRetry?: (messageId: string) => void;
+}) {
   const isUser = message.role === "user";
+  const isFailed = message.status === "error";
 
   return (
-    <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>
+    <div className={cn("flex flex-col gap-1", isUser ? "items-end" : "items-start")}>
       <div
         className={cn(
           "max-w-[85%] rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap wrap-break-word",
-          isUser ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+          isUser ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
+          isFailed && "opacity-70"
         )}
       >
         {message.content}
       </div>
+      {isFailed && onRetry && (
+        <div className="text-destructive flex items-center gap-1 text-xs">
+          <Icons.warning className="size-3.5" />
+          <span>Not sent</span>
+          <Button
+            variant="link"
+            size="sm"
+            className="h-auto px-1 py-0 text-xs"
+            onClick={() => onRetry(message.id)}
+            disabled={isRetryDisabled}
+          >
+            Retry
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
@@ -99,9 +129,11 @@ function AgentChatBody({
   description = "Ask the agent anything to get started.",
   placeholder = "Ask the agent...",
   suggestions = [],
+  maxLength = DEFAULT_MAX_MESSAGE_LENGTH,
   messages: controlledMessages,
   isResponding = false,
   onSendMessage,
+  onRetry,
   onReset,
   onClose,
 }: AgentChatBodyProps) {
@@ -118,7 +150,7 @@ function AgentChatBody({
 
   const handleSubmit = async () => {
     const content = input.trim();
-    if (!content || isResponding) return;
+    if (!content || content.length > maxLength || isResponding) return;
 
     if (!isControlled) {
       setInternalMessages((current) => [
@@ -185,7 +217,12 @@ function AgentChatBody({
         ) : (
           <div className="flex flex-col gap-3 p-3">
             {messages.map((message) => (
-              <AgentChatMessageBubble key={message.id} message={message} />
+              <AgentChatMessageBubble
+                key={message.id}
+                message={message}
+                isRetryDisabled={isResponding}
+                onRetry={onRetry}
+              />
             ))}
             {isResponding && <AgentChatThinkingBubble />}
           </div>
@@ -195,14 +232,22 @@ function AgentChatBody({
       <div className="shrink-0 p-3">
         <PromptInput
           value={input}
-          onValueChange={setInput}
+          onValueChange={(value) => setInput(value.slice(0, maxLength))}
           onSubmit={() => void handleSubmit()}
           isLoading={isResponding}
           maxHeight={160}
           className="rounded-2xl"
         >
-          <PromptInputTextarea placeholder={placeholder} />
-          <PromptInputActions className="justify-end pt-1">
+          <PromptInputTextarea placeholder={placeholder} maxLength={maxLength} />
+          <PromptInputActions className="justify-end gap-2 pt-1">
+            <span
+              className={cn(
+                "text-muted-foreground text-xs tabular-nums",
+                input.length >= maxLength && "text-destructive"
+              )}
+            >
+              {input.length}/{maxLength}
+            </span>
             <PromptInputAction tooltip="Send message">
               <Button
                 size="icon"
